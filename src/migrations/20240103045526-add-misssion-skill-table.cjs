@@ -21,6 +21,7 @@ module.exports = {
                             key: 'id',
                             model: 'mission',
                         },
+                        onDelete: 'CASCADE',
                     },
                     skill_id: {
                         allowNull: false,
@@ -45,19 +46,10 @@ module.exports = {
             await queryInterface.removeColumn('mission', 'created_date', {
                 transaction,
             });
+            await queryInterface.removeColumn('mission', 'uploaded_date', {
+                transaction,
+            });
 
-            await queryInterface.addColumn(
-                'mission',
-                'mission_skill_id',
-                {
-                    type: Sequelize.INTEGER,
-                    references: {
-                        key: 'id',
-                        model: 'mission_skills',
-                    },
-                },
-                { transaction }
-            );
             await queryInterface.addColumn(
                 'mission',
                 'updated_date',
@@ -67,6 +59,7 @@ module.exports = {
                 },
                 { transaction }
             );
+
             await queryInterface.addColumn(
                 'mission',
                 'created_date',
@@ -99,10 +92,10 @@ module.exports = {
                 { transaction }
             );
 
-            await queryInterface.removeColumn('mission', 'mission_skill_id', {
+            await queryInterface.removeColumn('mission', 'created_date', {
                 transaction,
             });
-            await queryInterface.removeColumn('mission', 'created_date', {
+            await queryInterface.removeColumn('mission', 'updated_date', {
                 transaction,
             });
 

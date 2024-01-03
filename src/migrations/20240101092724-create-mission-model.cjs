@@ -73,7 +73,7 @@ module.exports = {
                         type: Sequelize.DATE,
                     },
                     deadline: {
-                        type: Sequelize.STRING,
+                        type: Sequelize.DATE,
                     },
                     total_seats: {
                         type: Sequelize.INTEGER,

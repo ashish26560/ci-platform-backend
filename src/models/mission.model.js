@@ -24,6 +24,14 @@ export default function MissionModel(sequelize) {
                 key: 'id',
             },
         },
+        theme_id: {
+            allowNull: false,
+            type: DataTypes.INTEGER,
+            references: {
+                model: 'theme',
+                key: 'id',
+            },
+        },
         availability_id: {
             allowNull: false,
             type: DataTypes.INTEGER,
@@ -67,7 +75,7 @@ export default function MissionModel(sequelize) {
             type: DataTypes.DATE,
         },
         deadline: {
-            type: DataTypes.STRING,
+            type: DataTypes.DATE,
         },
         total_seats: {
             type: DataTypes.INTEGER,

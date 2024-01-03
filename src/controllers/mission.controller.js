@@ -1,15 +1,22 @@
 import sequelize from '../db/index.js';
 import { getIdParam } from '../utils/helpers.js';
+import { getLookupDetailId } from './common.controller.js';
 
 async function getAll(req, res) {
-    // const users = await sequelize.models.mission.findAll();
     const users = await sequelize.models.mission.findAll();
     res.status(200).json(users);
 }
 
 async function getById(req, res) {
     const id = getIdParam(req);
-    const mission = await sequelize.models.mission.findByPk(id);
+    const mission = await sequelize.models.mission.findByPk(id, {
+        include: [
+            {
+                model: sequelize.models.mission_skills,
+                as: 'mission_skills',
+            },
+        ],
+    });
     if (mission) {
         res.status(200).json(mission);
     } else {
@@ -23,8 +30,57 @@ async function create(req, res) {
             `Bad request: ID should not be provided, since it is determined automatically by the database.`
         );
     } else {
-        await sequelize.models.mission.create(req.body);
-        res.status(201).end();
+        const transaction = await sequelize.transaction();
+        try {
+            const isMissionTypeGoal = req.body.mission_type_code === 'GOAL';
+            const createdMission = await sequelize.models.mission.create(
+                {
+                    ...req.body,
+                    total_seats: isMissionTypeGoal
+                        ? req.body.total_seats
+                        : null,
+                    seats_left: isMissionTypeGoal ? req.body.seats_left : null,
+                    mission_type_id: await getLookupDetailId(
+                        'MISSION_TYPE',
+                        req.body.mission_type_code
+                    ),
+                    availability_id: await getLookupDetailId(
+                        'AVAILABILITY',
+                        req.body.availability_code
+                    ),
+                    created_date: new Date(),
+                    updated_date: new Date(),
+                    start_date: isMissionTypeGoal ? null : req.body.start_date,
+                    end_date: isMissionTypeGoal ? null : req.body.end_date,
+                    deadline: isMissionTypeGoal ? null : req.body.deadline,
+                },
+                { transaction }
+            );
+            const missionId = createdMission.id;
+
+            const skillIds = req.body.skill_ids;
+            const missionSkillEntries = skillIds.map((skillId) => ({
+                skill_id: skillId,
+                mission_id: missionId,
+                created_date: new Date(),
+                updated_date: new Date(),
+            }));
+            await sequelize.models.mission_skills.bulkCreate(
+                missionSkillEntries,
+                { transaction }
+            );
+            await transaction.commit();
+            res.status(201)
+                .json({
+                    mission: createdMission.toJSON(),
+                    mission_skills: missionSkillEntries,
+                })
+                .end();
+        } catch (err) {
+            console.error('err', err);
+            await transaction.rollback();
+            res.status(500).send('Internal Server Error');
+        }
     }
 }
 
