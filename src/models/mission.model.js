@@ -115,6 +115,11 @@ export default function MissionModel(sequelize) {
             foreignKey: 'mission_type_id',
             as: 'mission_type',
         });
+        mission.hasMany(models.mission_skills, {
+            foreignKey: 'mission_id',
+            as: 'mission_skills',
+            onDelete: 'CASCADE',
+        });
     };
 
     return mission;

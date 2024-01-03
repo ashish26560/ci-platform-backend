@@ -51,7 +51,7 @@ export default function MissionSkillModel(sequelize) {
             as: 'mission',
             onDelete: 'CASCADE',
         });
-        mission_skills.belongsTo(models.mission, {
+        mission_skills.belongsTo(models.skill, {
             foreignKey: 'skill_id',
             as: 'skill',
         });
