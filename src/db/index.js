@@ -1,5 +1,11 @@
 import Sequelize from 'sequelize';
 import MissionModel from '../models/mission.model.js';
+import CityModel from '../models/city.model.js';
+import CountryModel from '../models/country.model.js';
+import lookupDetailsModel from '../models/lookupDetails.model.js';
+import lookupModel from '../models/lookup.model.js';
+import skillModel from '../models/skill.model.js';
+import themeModel from '../models/theme.model.js';
 
 const sequelize = new Sequelize(
     process.env.DB,
@@ -20,15 +26,23 @@ const sequelize = new Sequelize(
 
 const modelDefiners = [
     MissionModel,
-    // require('./models/instrument.model'),
-    // require('./models/orchestra.model'),
-    // Add more models here...
-    // require('./models/item'),
+    CountryModel,
+    CityModel,
+    lookupDetailsModel,
+    lookupModel,
+    themeModel,
+    skillModel,
 ];
 
 // We define all models according to their files.
 for (const modelDefiner of modelDefiners) {
     modelDefiner(sequelize);
 }
+
+Object.values(sequelize.models).forEach((model) => {
+    if (model.associate) {
+        model.associate(sequelize.models);
+    }
+});
 
 export default sequelize;

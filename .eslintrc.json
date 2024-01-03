@@ -1,5 +1,6 @@
 {
     "root": true,
+	"noUnusedLocals":false,
     "parserOptions": {
         "ecmaVersion": 12,
         "sourceType": "module"

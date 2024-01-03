@@ -9,7 +9,11 @@
         "format:check": "prettier --check .",
         "format:write": "prettier --write .",
         "lint:check": "eslint .",
-        "lint:fix": "eslint --fix ."
+        "lint:fix": "eslint --fix .",
+        "migrate:up": "npx sequelize-cli db:migrate",
+        "migrate:undo": "npx sequelize-cli db:migrate:undo",
+        "seed:up":"npx sequelize-cli db:seed:all",
+        "seed:undo":"npx sequelize-cli db:seed:undo"
     },
     "author": "Ashish Chauhan",
     "license": "ISC",
@@ -17,7 +21,8 @@
         "eslint": "^8.56.0",
         "eslint-config-prettier": "^9.1.0",
         "nodemon": "^3.0.2",
-        "prettier": "^3.1.1"
+        "prettier": "^3.1.1",
+        "sequelize-cli": "^6.6.2"
     },
     "dependencies": {
         "cors": "^2.8.5",

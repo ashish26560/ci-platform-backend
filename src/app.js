@@ -1,6 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import missionRouter from './routers/mission.router.js';
+import commonRouter from './routers/common.router.js';
+import skillRouter from './routers/skill.router.js';
+import themeRouter from './routers/theme.router.js';
 
 const app = express();
 
@@ -16,6 +19,9 @@ app.use(express.json());
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
 app.use('/api/v1/missions', missionRouter);
+app.use('/api/v1/common', commonRouter);
+app.use('/api/v1/skills', skillRouter);
+app.use('/api/v1/themes', themeRouter);
 
 export { app };
 
