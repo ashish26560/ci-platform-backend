@@ -73,17 +73,13 @@ export default function MissionModel(sequelize) {
             type: DataTypes.INTEGER,
         },
         seats_left: { type: DataTypes.INTEGER },
-        Status: {
-            required: true,
-            type: DataTypes.STRING,
-        },
         created_date: {
             allowNull: false,
-            type: DataTypes.STRING,
+            type: DataTypes.DATE,
         },
-        uploaded_date: {
+        updated_date: {
             allowNull: false,
-            type: DataTypes.STRING,
+            type: DataTypes.DATE,
         },
     };
 

@@ -79,10 +79,6 @@ module.exports = {
                         type: Sequelize.INTEGER,
                     },
                     seats_left: { type: Sequelize.INTEGER },
-                    Status: {
-                        required: true,
-                        type: Sequelize.STRING,
-                    },
                     created_date: {
                         allowNull: false,
                         type: Sequelize.STRING,
