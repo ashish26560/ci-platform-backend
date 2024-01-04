@@ -5,7 +5,6 @@ import { getLookupDetailId } from './common.controller.js';
 async function getAll(req, res) {
     try {
         const missions = await sequelize.models.mission.findAll({
-            where: { id: ids },
             attributes: { exclude: ['created_date', 'updated_date'] },
             include: [
                 {
