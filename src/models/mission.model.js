@@ -107,6 +107,10 @@ export default function MissionModel(sequelize) {
             foreignKey: 'country_id',
             as: 'country',
         });
+        mission.belongsTo(models.theme, {
+            foreignKey: 'theme_id',
+            as: 'theme',
+        });
         mission.belongsTo(models.lookup_details, {
             foreignKey: 'availability_id',
             as: 'availability',
