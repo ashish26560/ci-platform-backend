@@ -7,6 +7,7 @@ import lookupModel from '../models/lookup.model.js';
 import skillModel from '../models/skill.model.js';
 import themeModel from '../models/theme.model.js';
 import MissionSkillModel from '../models/mission_skills.model.js';
+import GoalModel from '../models/goal.model.js';
 
 const sequelize = new Sequelize(
     process.env.DB,
@@ -34,6 +35,7 @@ const modelDefiners = [
     themeModel,
     skillModel,
     MissionSkillModel,
+    GoalModel,
 ];
 
 // We define all models according to their files.

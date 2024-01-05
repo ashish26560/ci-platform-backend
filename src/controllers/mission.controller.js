@@ -23,6 +23,16 @@ async function getAll(req, res) {
                     as: 'theme',
                     attributes: ['id', 'name'],
                 },
+                {
+                    model: sequelize.models.lookup_details,
+                    as: 'mission_type',
+                    attributes: ['id', 'name'],
+                },
+                {
+                    model: sequelize.models.goal,
+                    as: 'goal',
+                    attributes: { exclude: ['created_date', 'updated_date'] },
+                },
             ],
         });
 
@@ -105,11 +115,16 @@ async function create(req, res) {
             const isMissionTypeGoal = req.body.mission_type_code === 'GOAL';
             const createdMission = await sequelize.models.mission.create(
                 {
-                    ...req.body,
-                    total_seats: isMissionTypeGoal
-                        ? req.body.total_seats
-                        : null,
-                    seats_left: isMissionTypeGoal ? req.body.seats_left : null,
+                    city_id: req.body.city_id,
+                    country_id: req.body.country_id,
+                    theme_id: req.body.theme_id,
+                    title: req.body.title,
+                    description: req.body.description,
+                    short_description: req.body.short_description,
+                    organization_name: req.body.organization_name,
+                    organization_detail: req.body.organization_detail,
+                    total_seats: req.body.total_seats,
+                    seats_left: req.body.seats_left,
                     mission_type_id: await getLookupDetailId(
                         'MISSION_TYPE',
                         req.body.mission_type_code
@@ -120,12 +135,13 @@ async function create(req, res) {
                     ),
                     created_date: new Date(),
                     updated_date: new Date(),
-                    start_date: isMissionTypeGoal ? null : req.body.start_date,
+                    start_date: req.body.start_date,
+                    deadline: req.body.deadline,
                     end_date: isMissionTypeGoal ? null : req.body.end_date,
-                    deadline: isMissionTypeGoal ? null : req.body.deadline,
                 },
                 { transaction }
             );
+
             const missionId = createdMission.id;
 
             const skillIds = req.body.skill_ids;
@@ -139,6 +155,20 @@ async function create(req, res) {
                 missionSkillEntries,
                 { transaction }
             );
+            isMissionTypeGoal &&
+                (await sequelize.models.goal.create(
+                    {
+                        mission_id: missionId,
+                        objective: req.body.goal_objective,
+                        target: req.body.goal_target,
+                        achieved: req.body.goal_achieved ?? 0,
+                        created_date: new Date(),
+                        updated_date: new Date(),
+                    },
+                    {
+                        transaction,
+                    }
+                ));
             await transaction.commit();
             res.status(201)
                 .json({
@@ -147,6 +177,7 @@ async function create(req, res) {
                 })
                 .end();
         } catch (err) {
+            console.error('error is', err);
             await transaction.rollback();
             res.status(500).send('Internal Server Error');
         }

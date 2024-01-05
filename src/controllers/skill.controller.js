@@ -3,7 +3,15 @@ import { getIdParam } from '../utils/helpers.js';
 import { getLookupDetailId } from './common.controller.js';
 
 async function getAll(req, res) {
-    const skills = await sequelize.models.skill.findAll();
+    const skills = await sequelize.models.skill.findAll({
+        include: [
+            {
+                model: sequelize.models.lookup_details,
+                as: 'status',
+                attributes: ['id', 'code', 'name'],
+            },
+        ],
+    });
     res.status(200).json(skills);
 }
 

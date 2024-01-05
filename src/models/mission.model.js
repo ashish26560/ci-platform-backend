@@ -124,6 +124,11 @@ export default function MissionModel(sequelize) {
             as: 'mission_skills',
             onDelete: 'CASCADE',
         });
+        mission.hasOne(models.goal, {
+            foreignKey: 'mission_id',
+            as: 'goal',
+            onDelete: 'CASCADE',
+        });
     };
 
     return mission;
