@@ -1,9 +1,30 @@
 import sequelize from '../db/index.js';
 import { getIdParam } from '../utils/helpers.js';
 import { getLookupDetailId } from './common.controller.js';
+import { getPagination, getPagingData } from './skill.controller.js';
 
 async function getAll(req, res) {
-    const themes = await sequelize.models.theme.findAll({
+    const { page, pageSize, search } = req.body;
+
+    const { limit, offset } = getPagination(page, pageSize);
+
+    const searchCriteria = search
+        ? {
+              [Op.or]: [
+                  { name: { [Op.iLike]: `%${search}%` } },
+                  //   {
+                  //       status: {
+                  //           name: { [Op.iLike]: `%${search}%` },
+                  //       },
+                  //   },
+              ],
+          }
+        : {};
+
+    const data = await sequelize.models.theme.findAndCountAll({
+        where: searchCriteria,
+        limit,
+        offset,
         include: [
             {
                 model: sequelize.models.lookup_details,
@@ -12,7 +33,7 @@ async function getAll(req, res) {
             },
         ],
     });
-    res.status(200).json(themes);
+    res.status(200).json(getPagingData(data, page, limit));
 }
 
 async function getById(req, res) {

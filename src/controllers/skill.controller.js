@@ -1,9 +1,43 @@
 import sequelize from '../db/index.js';
 import { getIdParam } from '../utils/helpers.js';
 import { getLookupDetailId } from './common.controller.js';
+import { Op } from 'sequelize';
+
+export const getPagination = (page, size) => {
+    const limit = size ? +size : 1;
+    const offset = page ? (page - 1) * limit : 0;
+    return { limit, offset };
+};
+
+export const getPagingData = (data, page, limit) => {
+    const { count: totalItems, rows } = data;
+    const currentPage = page ? +page : 0;
+    const totalPages = Math.ceil(totalItems / limit);
+    return { totalItems, data: rows, totalPages, currentPage };
+};
 
 async function getAll(req, res) {
-    const skills = await sequelize.models.skill.findAll({
+    const { page, pageSize, search } = req.body;
+
+    const { limit, offset } = getPagination(page, pageSize);
+
+    const searchCriteria = search
+        ? {
+              [Op.or]: [
+                  { name: { [Op.iLike]: `%${search}%` } },
+                  //   {
+                  //       status: {
+                  //           name: { [Op.iLike]: `%${search}%` },
+                  //       },
+                  //   },
+              ],
+          }
+        : {};
+
+    const data = await sequelize.models.skill.findAndCountAll({
+        where: searchCriteria,
+        limit,
+        offset,
         include: [
             {
                 model: sequelize.models.lookup_details,
@@ -12,7 +46,7 @@ async function getAll(req, res) {
             },
         ],
     });
-    res.status(200).json(skills);
+    res.status(200).json(getPagingData(data, page, limit));
 }
 
 async function getById(req, res) {

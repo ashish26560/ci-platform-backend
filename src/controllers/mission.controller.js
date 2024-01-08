@@ -1,45 +1,68 @@
 import sequelize from '../db/index.js';
 import { getIdParam } from '../utils/helpers.js';
 import { getLookupDetailId } from './common.controller.js';
+import { Op } from 'sequelize';
+import { getPagination, getPagingData } from './skill.controller.js';
 
 async function getAll(req, res) {
     try {
-        const missions = await sequelize.models.mission.findAll({
-            attributes: { exclude: ['created_date', 'updated_date'] },
-            include: [
-                {
-                    model: sequelize.models.mission_skills,
-                    as: 'mission_skills',
-                    include: [
-                        {
-                            model: sequelize.models.skill,
-                            as: 'skill',
-                            attributes: ['id', 'name'],
-                        },
-                    ],
-                },
-                {
-                    model: sequelize.models.theme,
-                    as: 'theme',
-                    attributes: ['id', 'name'],
-                },
-                {
-                    model: sequelize.models.lookup_details,
-                    as: 'mission_type',
-                    attributes: ['id', 'name'],
-                },
-                {
-                    model: sequelize.models.goal,
-                    as: 'goal',
-                    attributes: { exclude: ['created_date', 'updated_date'] },
-                },
-            ],
-        });
+        const { page, pageSize, search } = req.body;
 
-        if (!missions) {
-            res.status(404).send('404 - Not found');
-            return;
+        const { limit, offset } = getPagination(page, pageSize);
+
+        console.error('req.query', req.body);
+        // Validate input parameters
+        if (isNaN(page) || isNaN(pageSize) || page <= 0 || pageSize <= 0) {
+            return res.status(400).send('Invalid page or pageSize');
         }
+
+        const searchCriteria = search
+            ? {
+                  [Op.or]: [
+                      { title: { [Op.iLike]: `%${search}%` } },
+                      //   { description: { [Op.iLike]: `%${search}%` } },
+                      // Add more search criteria as needed
+                  ],
+              }
+            : {};
+
+        const { count, rows: missions } =
+            await sequelize.models.mission.findAndCountAll({
+                where: searchCriteria,
+                limit,
+                offset,
+                attributes: { exclude: ['created_date', 'updated_date'] },
+                include: [
+                    {
+                        model: sequelize.models.mission_skills,
+                        as: 'mission_skills',
+                        include: [
+                            {
+                                model: sequelize.models.skill,
+                                as: 'skill',
+                                attributes: ['id', 'name'],
+                            },
+                        ],
+                    },
+                    {
+                        model: sequelize.models.theme,
+                        as: 'theme',
+                        attributes: ['id', 'name'],
+                    },
+                    {
+                        model: sequelize.models.lookup_details,
+                        as: 'mission_type',
+                        attributes: ['id', 'name'],
+                    },
+                    {
+                        model: sequelize.models.goal,
+                        as: 'goal',
+                        attributes: {
+                            exclude: ['created_date', 'updated_date'],
+                        },
+                    },
+                ],
+            });
 
         const result = missions.map((mission) => {
             const missionSkills = mission.mission_skills.map(
@@ -54,8 +77,11 @@ async function getAll(req, res) {
             };
         });
 
-        res.status(200).json(result);
+        res.status(200).json(
+            getPagingData({ count, rows: result }, page, limit)
+        );
     } catch (error) {
+        console.error('Error in getAll:', error);
         res.status(500).send('Internal Server Error');
     }
 }
