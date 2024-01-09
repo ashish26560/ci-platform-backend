@@ -20,7 +20,10 @@ async function getAll(req, res) {
             ? {
                   [Op.or]: [
                       { title: { [Op.iLike]: `%${search}%` } },
-                      //   { description: { [Op.iLike]: `%${search}%` } },
+                      //   { start_date: { [Op.iLike]: `%${search}%` } },
+
+                      { '$status.name$': { [Op.iLike]: `%${search}%` } },
+                      //   { endDate: { [Op.iLike]: `%${search}%` } },
                       // Add more search criteria as needed
                   ],
               }
@@ -28,6 +31,7 @@ async function getAll(req, res) {
 
         const { count, rows: missions } =
             await sequelize.models.mission.findAndCountAll({
+                distinct: true,
                 where: searchCriteria,
                 limit,
                 offset,
@@ -65,7 +69,7 @@ async function getAll(req, res) {
             });
 
         const result = missions.map((mission) => {
-            const missionSkills = mission.mission_skills.map(
+            const missionSkills = mission.mission_skills?.map(
                 ({ skill }) => skill
             );
 

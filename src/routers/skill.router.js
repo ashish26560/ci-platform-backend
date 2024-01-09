@@ -10,7 +10,7 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 
 const router = Router();
 
-router.route('/').post(asyncHandler(getAll));
+router.route('/search').post(asyncHandler(getAll));
 router.route('/').post(asyncHandler(create));
 
 router.route('/:id').get(asyncHandler(getById));
